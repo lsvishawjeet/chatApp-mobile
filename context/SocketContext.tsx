@@ -29,8 +29,11 @@ export const SocketProvider = ({
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const socket = useRef<WebSocket | null>(null);
 
-  const webSocketConnect=()=>{
+  const webSocketConnect = () => {
     if (!token) return;
+    if (socket.current) {
+      socket.current.close();
+    }
     socket.current = new WebSocket(`${Config.apiSocketUrl}/ws?token=${token}`);
 
     socket.current.onopen = () => {
@@ -54,17 +57,47 @@ export const SocketProvider = ({
   }
 
   useEffect(() => {
-    webSocketConnect();
+    const cleanup = webSocketConnect();
+    return cleanup;
   }, [token]);
 
   const fetchOnlineUsers = () => {
     socket.current?.send(JSON.stringify({ action: "get_online_users" }));
   };
 
-  const sendMessage = (receiverId: string, content: string, type: "text" | "image" = "text") => {
-    if(socket.current?.readyState !== WebSocket.OPEN){
+  const sendMessage = async (receiverId: string, content: string, type: "text" | "image" = "text") => {
+    console.log("Attempting to send message. Socket State:", socket.current?.readyState);
+
+    if (!socket.current || socket.current.readyState !== WebSocket.OPEN) {
+      if (socket.current?.readyState === WebSocket.CONNECTING) {
+        console.log("Socket is connecting, waiting...");
+      } else {
+        console.log("Socket disconnected (State: " + socket.current?.readyState + "), reconnecting...");
         webSocketConnect();
+      }
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          let attempts = 0;
+          const interval = setInterval(() => {
+            attempts++;
+            if (socket.current?.readyState === WebSocket.OPEN) {
+              console.log("Socket connected successfully during wait.");
+              clearInterval(interval);
+              resolve();
+            }
+            if (attempts > 50) { // 5 seconds
+              clearInterval(interval);
+              reject(new Error("Socket connection timeout. State: " + socket.current?.readyState));
+            }
+          }, 100);
+        });
+      } catch (e) {
+        console.error("Reconnection failed:", e);
+        return false;
+      }
     }
+
     const currentDate = new Date().toISOString();
 
     const payload = {
@@ -79,7 +112,9 @@ export const SocketProvider = ({
 
     if (socket.current?.readyState === WebSocket.OPEN) {
       try {
+        console.log("Sending message payload...");
         socket.current.send(JSON.stringify(payload));
+        console.log("Message sent to socket.");
 
         const myMessage: MessagePayload = {
           action: "new_message",
@@ -97,7 +132,7 @@ export const SocketProvider = ({
         return false;
       }
     } else {
-      console.warn("Socket is not OPEN. Current state:", socket.current?.readyState);
+      console.warn("Socket is not OPEN after wait. Current state:", socket.current?.readyState);
       return false;
     }
   };

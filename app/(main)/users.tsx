@@ -17,9 +17,9 @@ const Users = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    setTimeout(() => {
+    setTimeout(()=>{
         fetchOnlineUsers();
-    }, 2000)
+    }, 5000)
 
     const fetchUsers = async () => {
         try {
@@ -38,7 +38,7 @@ const Users = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, [onlineUsers]);
+    }, []);
 
     const handleRefresh = () => {
         setRefreshing(true);

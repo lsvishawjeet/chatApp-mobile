@@ -43,6 +43,6 @@ export interface SocketContextType {
   onlineUsers: OnlineUser[];
   messages: MessagePayload[];
   isConnected: boolean;
-  sendMessage: (receiverId: string, text: string, type: "text" | "image") => boolean;
+  sendMessage: (receiverId: string, text: string, type: "text" | "image") => Promise<boolean>;
   fetchOnlineUsers: () => void;
 }
