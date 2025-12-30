@@ -1,5 +1,5 @@
 export const Config = {
-    apiUrl: 'http://10.20.10.193:4003',
-    apiSocketUrl: 'ws://10.20.10.193:4001',
+    apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    apiSocketUrl: process.env.EXPO_PUBLIC_API_SOCKET_URL,
     timeout: 5000,
 }
