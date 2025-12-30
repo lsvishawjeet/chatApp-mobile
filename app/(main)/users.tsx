@@ -1,8 +1,9 @@
 import { useSocket } from '@/context/SocketContext';
-import { allUsersApiResponse, User } from '@/interfaces/apiResponse';
+import { allUsersApiResponse, OnlineUser, User } from '@/interfaces/apiResponse';
 import { getAllUsersService } from '@/services/authService';
+import { deleteToken } from '@/utilities/authStore';
 import { Stack, useRouter } from 'expo-router';
-import { ChevronRight, Search } from 'lucide-react-native';
+import { ChevronRight, LogOut, Search } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,10 @@ const Users = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+
+    setTimeout(() => {
+        fetchOnlineUsers();
+    }, 2000)
 
     const fetchUsers = async () => {
         try {
@@ -33,11 +38,21 @@ const Users = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [onlineUsers]);
 
     const handleRefresh = () => {
         setRefreshing(true);
         fetchUsers();
+        fetchOnlineUsers();
+    };
+
+    const handleLogout = async () => {
+        try {
+            await deleteToken();
+            router.replace("/(auth)/login");
+        } catch (error) {
+            console.error("Failed to logout", error);
+        }
     };
 
     const handleSearch = (text: string) => {
@@ -62,7 +77,7 @@ const Users = () => {
     };
 
     const renderItem = ({ item }: { item: User }) => {
-        const isOnline = onlineUsers.some((usr) => usr.userId === item._id);
+        const isOnline = onlineUsers.some((usr: OnlineUser) => usr.userId === item._id);
 
         return (
             <Pressable
@@ -96,13 +111,21 @@ const Users = () => {
             <Stack.Screen options={{ headerShown: false }} />
 
             <View className="flex-1 px-6">
-                <View className="mt-6 mb-6">
-                    <Text className="text-4xl font-bold text-text tracking-tight">
-                        Chats
-                    </Text>
-                    <Text className="text-muted mt-1 text-lg">
-                        Connect with your friends
-                    </Text>
+                <View className="mt-6 mb-6 flex-row items-center justify-between">
+                    <View>
+                        <Text className="text-4xl font-bold text-text tracking-tight">
+                            Chats
+                        </Text>
+                        <Text className="text-muted mt-1 text-lg">
+                            Connect with your friends
+                        </Text>
+                    </View>
+                    <Pressable
+                        onPress={handleLogout}
+                        className="w-12 h-12 bg-white rounded-full items-center justify-center border border-slate-200 shadow-sm active:bg-slate-50"
+                    >
+                        <LogOut size={22} color="#EF4444" />
+                    </Pressable>
                 </View>
 
                 <View className="flex-row items-center bg-white border border-slate-200 rounded-2xl px-4 h-14 mb-6 shadow-sm">

@@ -29,7 +29,7 @@ export const SocketProvider = ({
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const socket = useRef<WebSocket | null>(null);
 
-  useEffect(() => {
+  const webSocketConnect=()=>{
     if (!token) return;
     socket.current = new WebSocket(`${Config.apiSocketUrl}/ws?token=${token}`);
 
@@ -51,37 +51,54 @@ export const SocketProvider = ({
     socket.current.onclose = () => setIsConnected(false);
 
     return () => socket.current?.close();
+  }
+
+  useEffect(() => {
+    webSocketConnect();
   }, [token]);
 
   const fetchOnlineUsers = () => {
     socket.current?.send(JSON.stringify({ action: "get_online_users" }));
   };
 
-  const sendMessage = (receiverId: string, text: string) => {
+  const sendMessage = (receiverId: string, content: string, type: "text" | "image" = "text") => {
+    if(socket.current?.readyState !== WebSocket.OPEN){
+        webSocketConnect();
+    }
     const currentDate = new Date().toISOString();
 
     const payload = {
       action: "send_message",
       receiverId: receiverId,
       data: {
-        message: text,
+        message: content,
+        type: type,
         currentDate: currentDate,
       },
     };
 
     if (socket.current?.readyState === WebSocket.OPEN) {
-      socket.current.send(JSON.stringify(payload));
+      try {
+        socket.current.send(JSON.stringify(payload));
 
-      // Manually push your message to the state so you see it instantly
-      const myMessage: MessagePayload = {
-        action: "new_message",
-        sender: "ME",
-        receiverId: receiverId, // Track who this message was for
-        message: text,
-        messageTime: currentDate,
-      };
+        const myMessage: MessagePayload = {
+          action: "new_message",
+          sender: "ME",
+          receiverId: receiverId,
+          message: content,
+          type: type,
+          messageTime: currentDate,
+        };
 
-      setMessages((prev) => [...prev, myMessage]);
+        setMessages((prev) => [...prev, myMessage]);
+        return true;
+      } catch (error) {
+        console.error("Socket send error:", error);
+        return false;
+      }
+    } else {
+      console.warn("Socket is not OPEN. Current state:", socket.current?.readyState);
+      return false;
     }
   };
 

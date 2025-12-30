@@ -5,14 +5,13 @@ import { Stack, useRouter } from "expo-router";
 import { ChevronRight, Lock, Mail } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View
 } from "react-native";
 import { Snackbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -51,10 +50,10 @@ const Login = () => {
       <Stack.Screen options={{ headerShown: false }} />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior="padding"
         className="flex-1"
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           className="px-8"
@@ -80,15 +79,15 @@ const Login = () => {
                 <View className="flex-row items-center bg-white border border-slate-200 rounded-2xl px-4 h-16 shadow-sm focus:border-primary">
                   <Mail size={20} color="#64748B" />
                   <TextInput
-    value={email}
-    onChangeText={setEmail}
-    autoCapitalize="none"
-    keyboardType="email-address"
-    placeholder="name@example.com"
-    placeholderTextColor="#94a3b8"
-    style={{ includeFontPadding: false, textAlignVertical: 'center' }}
-    className="flex-1 ml-3 text-text text-base py-0 h-full"
-  />
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    placeholder="name@example.com"
+                    placeholderTextColor="#94a3b8"
+                    style={{ includeFontPadding: false, textAlignVertical: 'center' }}
+                    className="flex-1 ml-3 text-text text-base py-0 h-full"
+                  />
                 </View>
               </View>
 
@@ -115,9 +114,8 @@ const Login = () => {
               <Pressable
                 onPress={handleLogin}
                 disabled={loading}
-                className={`mt-4 h-16 rounded-2xl flex-row items-center justify-center shadow-md ${
-                  loading ? "bg-indigo-400" : "bg-primary"
-                }`}
+                className={`mt-4 h-16 rounded-2xl flex-row items-center justify-center shadow-md ${loading ? "bg-indigo-400" : "bg-primary"
+                  }`}
               >
                 {loading ? (
                   <ActivityIndicator color="white" />
