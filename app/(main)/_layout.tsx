@@ -33,7 +33,7 @@ export default function MainLayout() {
     <SocketProvider token={token}>
       <Stack>
         <Stack.Screen name="users" options={{ headerTitle: "Users" }} />
-        <Stack.Screen name="chat/[id]" options={{ headerTitle: "Chat" }} />
+        <Stack.Screen name="chat/[name]/[id]" options={{ headerTitle: "Chat" }} />
       </Stack>
     </SocketProvider>
   );
