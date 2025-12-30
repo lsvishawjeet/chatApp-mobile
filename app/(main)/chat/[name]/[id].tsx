@@ -1,10 +1,10 @@
 import { View, Text, FlatList, TextInput, Button } from "react-native";
 import React, { useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useSocket } from "@/context/SocketContext";
 
 const Chat = () => {
-  const { id } = useLocalSearchParams();
+  const { id, name } = useLocalSearchParams();
   const { messages, sendMessage } = useSocket();
   const [text, setText] = useState<string>("");
 
@@ -18,8 +18,10 @@ const Chat = () => {
     setText('');
   };
   return (
+    <>
+    <Stack.Screen options={{headerTitle:name as string}}/>
     <View>
-      <Text>{id}</Text>
+      {/* <Text>{name}</Text> */}
       <FlatList
         data={chatHistory}
         keyExtractor={(item, index) => index.toString()}
@@ -40,6 +42,7 @@ const Chat = () => {
       <TextInput value={text} onChangeText={setText} placeholder="Type message..." />
       <Button title="Send" onPress={onSend} />
     </View>
+    </>
   );
 };
 
